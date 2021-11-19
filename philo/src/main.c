@@ -6,11 +6,12 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 18:42:04 by fbes          ########   odam.nl         */
+/*   Updated: 2021/11/19 19:59:53 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
+#include <stdlib.h>
 #include "philo.h"
 
 /**
@@ -26,28 +27,51 @@ static int	print_err(char *msg)
 }
 
 /**
- * Check if the options are set correctly
- * @param options	The options
+ * Check if the sim are set correctly
+ * @param sim	The sim
  * @return			Returns 1 if set correctly, else < 0
  */
-static int	options_set_correctly(t_options *options)
+static int	sim_set_correctly(t_sim *sim)
 {
-	if (options->amount < 0)
+	if (sim->amount < 0)
 		return (-1);
-	if (options->time_to_die < 0)
+	if (sim->time_to_die < 0)
 		return (-2);
-	if (options->time_to_eat < 0)
+	if (sim->time_to_eat < 0)
 		return (-3);
-	if (options->time_to_sleep < 0)
+	if (sim->time_to_sleep < 0)
 		return (-4);
-	if (options->times_to_eat != UNLIMITED_TIMES_TO_EAT
-		&& options->times_to_eat < 0)
+	if (sim->times_to_eat != UNLIMITED_TIMES_TO_EAT
+		&& sim->times_to_eat < 0)
 		return (-5);
 	return (1);
 }
 
-static int	start(t_options *options)
+static int	start_sim(t_sim *sim)
 {
+	int			i;
+	t_philo		*philo;
+	t_list		*temp;
+
+	write(1, "Initializing simulation...\n", 27);
+	sim->philos = NULL;
+	i = 0;
+	while (i < sim->amount)
+	{
+		philo = (t_philo *)malloc(sizeof(t_philo));
+		if (!philo)
+			return (-1);
+		philo->id = i + 1;
+		temp = ph_list_new(philo);
+		if (!temp)
+			return (-2);
+		ph_list_add(&sim->philos, temp);
+		if (pthread_create(&philo->thread, NULL, &start_routine, sim))
+			return (-3);
+		if (pthread_join(philo->thread, philo->ret))
+			return (-4);
+		i++;
+	}
 	write(1, "Started running simulation...\n", 30);
 	return (0);
 }
@@ -55,22 +79,22 @@ static int	start(t_options *options)
 int	main(int argc, char **argv)
 {
 	int			i;
-	t_options	options;
+	t_sim		sim;
 	int			err;
 
 	if (argc < 5)
 		return (print_err("missing arguments"));
 	else if (argc > 6)
 		return (print_err("too many arguments"));
-	options.amount = ph_parse_num(argv[1]);
-	options.time_to_die = ph_parse_num(argv[2]);
-	options.time_to_eat = ph_parse_num(argv[3]);
-	options.time_to_sleep = ph_parse_num(argv[4]);
+	sim.amount = ph_parse_num(argv[1]);
+	sim.time_to_die = ph_parse_num(argv[2]);
+	sim.time_to_eat = ph_parse_num(argv[3]);
+	sim.time_to_sleep = ph_parse_num(argv[4]);
 	if (argc == 6)
-		options.times_to_eat = ph_parse_num(argv[5]);
+		sim.times_to_eat = ph_parse_num(argv[5]);
 	else
-		options.times_to_eat = UNLIMITED_TIMES_TO_EAT;
-	err = options_set_correctly(&options);
+		sim.times_to_eat = UNLIMITED_TIMES_TO_EAT;
+	err = sim_set_correctly(&sim);
 	if (err == -1)
 		return (print_err("invalid number of philosophers set"));
 	else if (err == -2)
@@ -81,7 +105,11 @@ int	main(int argc, char **argv)
 		return (print_err("invalid time to sleep set"));
 	else if (err == -5)
 		return (print_err("invalid times to eat per philosopher set"));
-	else
-		start(&options);
+	if (start_sim(&sim) < 0)
+	{
+		system("leaks philo");
+		return (print_err("an error occurred during simulation"));
+	}
+	system("leaks philo");
 	return (0);
 }

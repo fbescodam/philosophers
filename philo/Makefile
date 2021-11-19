@@ -6,13 +6,13 @@
 #    By: fbes <fbes@student.codam.nl>                 +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/11/19 18:04:03 by fbes          #+#    #+#                  #
-#    Updated: 2021/11/19 18:21:12 by fbes          ########   odam.nl          #
+#    Updated: 2021/11/19 19:53:50 by fbes          ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 NAME =		philo
 
-SRCS =		src/main.c src/useful.c
+SRCS =		src/main.c src/useful.c src/philosopher.c src/list.c
 
 HEADERS =	includes/philo.h
 
