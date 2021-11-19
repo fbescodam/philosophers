@@ -6,27 +6,30 @@
 #    By: fbes <fbes@student.codam.nl>                 +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/11/19 18:04:03 by fbes          #+#    #+#                  #
-#    Updated: 2021/11/19 18:11:06 by fbes          ########   odam.nl          #
+#    Updated: 2021/11/19 18:21:12 by fbes          ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 NAME =		philo
 
-SRC =		src/main.c
+SRCS =		src/main.c src/useful.c
 
 HEADERS =	includes/philo.h
 
+INCLUDES =	-I includes
+
 OBJS =		$(SRCS:.c=.o)
 
-CFLAGS =	-Wall -Werror -Wextra
+#CFLAGS =	-Wall -Werror -Wextra
+CFLAGS =
 
 all: $(NAME)
 
 $(NAME): $(OBJS) $(HEADERS)
-	$(CC) $(CFLAGS) $(SRCS) -o $(NAME)
+	$(CC) $(CFLAGS) $(INCLUDES) $(SRCS) -o $(NAME)
 
 .c.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 bonus:
 	@echo I did not do the bonus
