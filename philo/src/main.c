@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 19:59:53 by fbes          ########   odam.nl         */
+/*   Updated: 2021/11/19 22:24:49 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,28 @@ static int	sim_set_correctly(t_sim *sim)
 static int	start_sim(t_sim *sim)
 {
 	int			i;
+	t_fork		*fork;
 	t_philo		*philo;
-	t_list		*temp;
+	t_list		*elem_fork;
+	t_list		*elem_philo;
 
 	write(1, "Initializing simulation...\n", 27);
 	sim->philos = NULL;
+	i = 0;
+	while (i < sim->amount)
+	{
+		fork = (t_fork *)malloc(sizeof(t_fork));
+		if (!fork)
+			return (-5);
+		fork->id = i + 1;
+		fork->status = FORK_FREE;
+		elem_fork = ph_list_new((void *)fork);
+		if (!elem_fork)
+			return (-6);
+		ph_list_add(&sim->forks, elem_fork);
+		i++;
+	}
+	elem_fork = sim->forks;
 	i = 0;
 	while (i < sim->amount)
 	{
@@ -62,13 +79,19 @@ static int	start_sim(t_sim *sim)
 		if (!philo)
 			return (-1);
 		philo->id = i + 1;
-		temp = ph_list_new(philo);
-		if (!temp)
+		philo->sim = sim;
+		philo->fork_left = (t_fork *)elem_fork->content;
+		elem_fork = elem_fork->next;
+		if (!elem_fork)
+			elem_fork = sim->forks;
+		philo->fork_right = (t_fork *)elem_fork->content;
+		elem_philo = ph_list_new((void *)philo);
+		if (!elem_philo)
 			return (-2);
-		ph_list_add(&sim->philos, temp);
-		if (pthread_create(&philo->thread, NULL, &start_routine, sim))
+		ph_list_add(&sim->philos, elem_philo);
+		if (pthread_create(&philo->thread, NULL, &start_routine, philo))
 			return (-3);
-		if (pthread_join(philo->thread, philo->ret))
+		if (pthread_join(philo->thread, &philo->ret))
 			return (-4);
 		i++;
 	}

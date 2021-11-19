@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:25:39 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 20:04:15 by fbes          ########   odam.nl         */
+/*   Updated: 2021/11/19 21:02:43 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,27 @@ t_list	*ph_list_last(t_list *list)
 	while (list->next)
 		list = list->next;
 	return (list);
+}
+
+/**
+ * Get an element from a list at index i
+ * @param list	The list
+ * @param i		The index
+ * @return		The element at that index
+ */
+t_list	*ph_list_get(t_list *list, size_t i)
+{
+	t_list	*temp;
+	size_t	j;
+
+	temp = list;
+	j = 0;
+	while (i < j)
+	{
+		temp = temp->next;
+		i++;
+	}
+	return (temp);
 }
 
 /**
