@@ -1,3 +1,6 @@
+philo
+*.DS_Store
+
 # Prerequisites
 *.d
 
