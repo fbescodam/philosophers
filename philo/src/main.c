@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/02/04 16:31:01 by fbes          ########   odam.nl         */
+/*   Updated: 2022/02/04 17:02:49 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ static int	start_sim(t_sim *sim)
 		if (!philo)
 			return (-1);
 		philo->id = i + 1;
+		philo->status = STATUS_THINKING;
 		philo->sim = sim;
 		philo->fork_left = (t_fork *)elem_fork->content;
 		elem_fork = elem_fork->next;
@@ -100,13 +101,16 @@ static int	start_sim(t_sim *sim)
 		write(1, "Philosopher generated\n", 23);
 		i++;
 	}
+	if (gettimeofday(&sim->start, NULL) != 0)
+		return (-8);
+	sim->running = 1;
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
 	{
-		if (pthread_create(&philo->thread, NULL, &start_routine, philo))
+		if (pthread_create(&philo->thread, NULL, &start_routine, philo) != 0)
 			return (-3);
-		if (pthread_join(philo->thread, &philo->ret))
+		if (pthread_join(philo->thread, &philo->ret) != 0)
 			return (-4);
 		elem_philo = elem_philo->next;
 		i++;
@@ -174,11 +178,11 @@ int	main(int argc, char **argv)
 			print_err("thread join failure");
 		else if (err == -7)
 			print_err("mutex initializion failure in fork");
+		else if (err == -8)
+			print_err("unable to fetch the current time");
 		else
 			print_err("an unknown error occurred during simulation");
 		destroyer(&sim);
-		exit(1);
 	}
 	destroyer(&sim);
-	exit(0);
 }
