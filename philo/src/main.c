@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 22:24:49 by fbes          ########   odam.nl         */
+/*   Updated: 2022/02/04 16:31:01 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	print_err(char *msg)
 /**
  * Check if the sim are set correctly
  * @param sim	The sim
- * @return			Returns 1 if set correctly, else < 0
+ * @return		Returns 1 if set correctly, else < 0
  */
 static int	sim_set_correctly(t_sim *sim)
 {
@@ -47,6 +47,7 @@ static int	sim_set_correctly(t_sim *sim)
 	return (1);
 }
 
+// TODO free memory before return
 static int	start_sim(t_sim *sim)
 {
 	int			i;
@@ -57,20 +58,27 @@ static int	start_sim(t_sim *sim)
 
 	write(1, "Initializing simulation...\n", 27);
 	sim->philos = NULL;
+	sim->forks = NULL;
 	i = 0;
 	while (i < sim->amount)
 	{
+		//write(1, "Generating fork...\n", 20);
 		fork = (t_fork *)malloc(sizeof(t_fork));
 		if (!fork)
 			return (-5);
 		fork->id = i + 1;
 		fork->status = FORK_FREE;
+		if (pthread_mutex_init(&fork->lock, NULL) != 0)
+			return (-7);
+		//write(1, "Creating new list elem for fork...\n", 36);
 		elem_fork = ph_list_new((void *)fork);
 		if (!elem_fork)
 			return (-6);
+		//write(1, "Adding fork to list of forks...\n", 33);
 		ph_list_add(&sim->forks, elem_fork);
 		i++;
 	}
+	write(1, "Forks have been generated\n", 27);
 	elem_fork = sim->forks;
 	i = 0;
 	while (i < sim->amount)
@@ -89,16 +97,41 @@ static int	start_sim(t_sim *sim)
 		if (!elem_philo)
 			return (-2);
 		ph_list_add(&sim->philos, elem_philo);
+		write(1, "Philosopher generated\n", 23);
+		i++;
+	}
+	elem_philo = sim->philos;
+	i = 0;
+	while (i < sim->amount)
+	{
 		if (pthread_create(&philo->thread, NULL, &start_routine, philo))
 			return (-3);
 		if (pthread_join(philo->thread, &philo->ret))
 			return (-4);
+		elem_philo = elem_philo->next;
 		i++;
 	}
 	write(1, "Started running simulation...\n", 30);
 	return (0);
 }
 
+static void	destroyer(t_sim *sim)
+{
+	t_list		*elem_fork;
+
+	if (pthread_mutex_destroy(&sim->write_lock) != 0)
+		print_err("could not destroy a mutex");
+	elem_fork = sim->forks;
+	while (elem_fork)
+	{
+		if (pthread_mutex_destroy(&((t_fork *)elem_fork->content)->lock) != 0)
+			print_err("could not destroy a mutex");
+		elem_fork = elem_fork->next;
+	}
+	system("leaks philo");
+}
+
+// TODO: return(print_err) should probably run destroyer() first
 int	main(int argc, char **argv)
 {
 	int			i;
@@ -128,11 +161,24 @@ int	main(int argc, char **argv)
 		return (print_err("invalid time to sleep set"));
 	else if (err == -5)
 		return (print_err("invalid times to eat per philosopher set"));
-	if (start_sim(&sim) < 0)
+	if (pthread_mutex_init(&sim.write_lock, NULL) != 0)
+		return (print_err("mutex initialization failure in write_lock"));
+	err = start_sim(&sim);
+	if (err < 0)
 	{
-		system("leaks philo");
-		return (print_err("an error occurred during simulation"));
+		if (err == -1 || err == -2 || err == -5 || err == -6)
+			print_err("memory allocation failure");
+		else if (err == -3)
+			print_err("thread creation failure");
+		else if (err == -4)
+			print_err("thread join failure");
+		else if (err == -7)
+			print_err("mutex initializion failure in fork");
+		else
+			print_err("an unknown error occurred during simulation");
+		destroyer(&sim);
+		exit(1);
 	}
-	system("leaks philo");
-	return (0);
+	destroyer(&sim);
+	exit(0);
 }

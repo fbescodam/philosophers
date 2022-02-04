@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 22:30:50 by fbes          ########   odam.nl         */
+/*   Updated: 2022/02/04 15:39:47 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static void	print_philo(t_philo *philo)
 {
 	printf("PHILOSOPHER %d\n", philo->id);
 	printf("status: %d\n", philo->status);
-	printf("last_ate: %d\n", philo->last_ate.tv_usec);
+	printf("last_ate: %lds, %dms\n", philo->last_ate.tv_sec, philo->last_ate.tv_usec);
 	printf("thread: %p\n", philo->thread);
 	printf("returned: %p\n", philo->ret);
 	printf("fork left: %p\n", philo->fork_left);

@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 21:03:00 by fbes          ########   odam.nl         */
+/*   Updated: 2022/02/04 16:25:17 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <sys/time.h>
 # include <stddef.h>
 # include <pthread.h>
+
 # define UNLIMITED_TIMES_TO_EAT -2
 # define STATUS_DEAD 0
 # define STATUS_THINKING 1
@@ -30,6 +31,7 @@ typedef struct s_fork
 {
 	int				id;
 	int				status;
+	pthread_mutex_t	lock;
 }					t_fork;
 
 typedef struct s_philo
@@ -57,6 +59,7 @@ typedef struct s_sim
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				times_to_eat;
+	pthread_mutex_t	write_lock;
 	t_list			*philos;
 	t_list			*forks;
 }					t_sim;
