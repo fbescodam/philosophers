@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/02/04 17:02:49 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/11 18:59:38 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,18 +103,26 @@ static int	start_sim(t_sim *sim)
 	}
 	if (gettimeofday(&sim->start, NULL) != 0)
 		return (-8);
-	sim->running = 1;
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
 	{
-		if (pthread_create(&philo->thread, NULL, &start_routine, philo) != 0)
+		if (pthread_create(&((t_philo *)elem_philo->content)->thread, NULL, &start_routine, elem_philo->content) != 0)
 			return (-3);
-		if (pthread_join(philo->thread, &philo->ret) != 0)
+		elem_philo = elem_philo->next;
+		i++;
+	}
+	elem_philo = sim->philos;
+	i = 0;
+	while (i < sim->amount)
+	{
+		if (pthread_join(((t_philo *)elem_philo->content)->thread, &((t_philo *)elem_philo->content)->ret) != 0)
 			return (-4);
 		elem_philo = elem_philo->next;
 		i++;
 	}
+	// check for this value in all threads, only then start running simulation
+	sim->running = 1;
 	write(1, "Started running simulation...\n", 30);
 	return (0);
 }
@@ -132,7 +140,7 @@ static void	destroyer(t_sim *sim)
 			print_err("could not destroy a mutex");
 		elem_fork = elem_fork->next;
 	}
-	system("leaks philo");
+	//system("leaks philo");
 }
 
 // TODO: return(print_err) should probably run destroyer() first
