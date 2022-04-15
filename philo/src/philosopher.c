@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/15 19:05:58 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 00:10:59 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,61 +14,24 @@
 #include "philo.h"
 
 /**
- * Try and fetch forks
- * @return Returns 1 if both were fetched, 0 if not
+ * Simulate one day of a philosopher's life
+ * @param[in] philo The philosopher to simulate
+ * @return Returns 0 on success, < 0 on error
  */
-static int	try_fetch_forks(t_philo *philo)
+static int	simulate(t_philo *philo)
 {
-	if (philo->id % 2 == 1)
-	{
-		if (change_right_fork(philo, TAKE_FORK) == 0)
-		{
-			if (change_left_fork(philo, TAKE_FORK) == 0)
-				return (1);
-			change_right_fork(philo, DROP_FORK);
-		}
-	}
-	else if (change_left_fork(philo, TAKE_FORK) == 0)
-	{
-		if (change_right_fork(philo, TAKE_FORK) == 0)
-			return (1);
-		change_left_fork(philo, DROP_FORK);
-	}
-	return (0);
-}
-
-int	decide_on_next_status(t_philo *philo)
-{
-	unsigned int	time;
-
-	if (!get_time_in_ms(&time))
+	if (!get_them_forks(philo))
+		return (-3);
+	if (!set_n_print_status(philo, eating))
 		return (-1);
-	if (time - philo->last_ate > philo->sim->time_to_die)
-	{
-		if (!set_n_print_status(philo, STATUS_DEAD))
-			return (-1);
-		return (2);
-	}
-	if (philo->status == STATUS_EATING)
-	{
-		change_left_fork(philo, DROP_FORK);
-		change_right_fork(philo, DROP_FORK);
-		if (!set_n_print_status(philo, STATUS_SLEEPING))
-			return (-1);
-		return (simulate(philo));
-	}
-	else if (try_fetch_forks(philo))
-	{
-		if (!set_n_print_status(philo, STATUS_EATING))
-			return (-1);
-		return (simulate(philo));
-	}
-	else if (philo->status != STATUS_THINKING)
-	{
-		if (!set_n_print_status(philo, STATUS_THINKING))
-			return (-1);
-		return (simulate(philo));
-	}
+	if (!ph_sleep(philo->sim->time_to_eat))
+		return (-2);
+	if (!drop_them_forks(philo))
+		return (-4);
+	if (!set_n_print_status(philo, sleeping))
+		return (-1);
+	if (!set_n_print_status(philo, thinking))
+		return (-1);
 	return (0);
 }
 
@@ -77,13 +40,19 @@ int	decide_on_next_status(t_philo *philo)
  * @param philo	A struct containing the philosopher's details
  * @return		Returns NULL
  */
-void	*start_routine(void *philo)
+void	*start_routine(void *philo_in_the_void)
 {
+	t_philo		*philo;
+	int			ret;
+
+	philo = (t_philo *)philo_in_the_void;
 	while (!((t_philo *)philo)->sim->started)
-	{
-		ph_sleep(philo, 5);
-	}
+		continue ;
 	((t_philo *)philo)->last_ate = ((t_philo *)philo)->sim->start;
-	decide_on_next_status(philo);
+	while (!philo->sim->stopped)
+	{
+		if (simulate(philo) < 0)
+			print_err("an error occurred while simulating a philosopher");
+	}
 	return (NULL);
 }

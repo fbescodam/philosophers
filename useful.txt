@@ -13,3 +13,8 @@ check with x 180 60 60 (zou oneindig door moeten gaan)
 
 3 180 60 60 - minimum
 2 400 200 200 - most precise
+
+
+
+
+TODO: protect the fucking mutex locks

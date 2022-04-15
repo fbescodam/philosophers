@@ -6,14 +6,14 @@
 #    By: fbes <fbes@student.codam.nl>                 +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/11/19 18:04:03 by fbes          #+#    #+#                  #
-#    Updated: 2022/04/14 18:35:40 by fbes          ########   odam.nl          #
+#    Updated: 2022/04/15 22:09:17 by fbes          ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 NAME =		philo
 
 SRCS =		src/main.c src/useful.c src/philosopher.c src/list.c src/forks.c \
-			src/simulation.c src/printer.c src/sleep.c
+			src/printer.c src/sleep.c src/monitor.c
 
 HEADERS =	includes/philo.h
 

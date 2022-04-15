@@ -6,10 +6,11 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/15 19:06:32 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 01:33:09 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include <stdio.h>
 #include "philo.h"
 
@@ -33,7 +34,8 @@ int	ph_print_fork_take(t_philo *philo)
 	if (!get_time_in_ms(&timestamp))
 		return (0);
 	pthread_mutex_lock(&philo->sim->write_lock);
-	printf("%6d %d has taken a fork\n", timestamp - philo->sim->start, philo->id);
+	if (!philo->sim->stopped)
+		printf("%6d %d has taken a fork\n", timestamp - philo->sim->start, philo->id);
 	pthread_mutex_unlock(&philo->sim->write_lock);
 	return (1);
 }
@@ -59,25 +61,37 @@ void	print_philo(t_philo *philo)
 
 /**
  * Set the philosopher status and print it.
+ * @param[in] philo The philosopher struct
+ * @param[in] status The new status of the philosopher
+ * @return Returns 1 on success, 0 on error
  */
-int	set_n_print_status(t_philo *philo, int status)
+int	set_n_print_status(t_philo *philo, enum e_status status)
 {
 	int				ret;
 	unsigned int	timestamp;
 
 	if (!get_time_in_ms(&timestamp))
 		return (0);
-	timestamp = timestamp - philo->sim->start;
 	philo->status = status;
-	pthread_mutex_lock(&philo->sim->write_lock);
-	if (status == STATUS_THINKING)
-		printf("%6d %d is thinking\n", timestamp, philo->id);
-	else if (status == STATUS_EATING)
-		printf("%6d %d is eating\n", timestamp, philo->id);
-	else if (status == STATUS_SLEEPING)
-		printf("%6d %d is sleeping\n", timestamp, philo->id);
-	else if (status == STATUS_DEAD)
-		printf("%6d %d died\n", timestamp, philo->id);
-	pthread_mutex_unlock(&philo->sim->write_lock);
+	if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
+		return (0);
+	timestamp = timestamp - philo->sim->start;
+	if (!philo->sim->stopped)
+	{
+		if (status == thinking)
+			printf("%6d %d is thinking\n", timestamp, philo->id);
+		else if (status == eating)
+		{
+			if (!get_time_in_ms(&philo->last_ate))
+				return (0);
+			printf("%6d %d is eating\n", timestamp, philo->id);
+		}
+		else if (status == sleeping)
+			printf("%6d %d is sleeping\n", timestamp, philo->id);
+		else if (status == dead)
+			printf("%6d %d died\n", timestamp, philo->id);
+	}
+	if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
+		return (0);
 	return (1);
 }

@@ -6,23 +6,19 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/15 18:50:09 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 01:31:14 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
-# include <unistd.h>
-# include <sys/time.h>
 # include <stddef.h>
 # include <pthread.h>
 
+enum e_status{dead, thinking, eating, sleeping};
+
 # define UNLIMITED_TIMES_TO_EAT -2
-# define STATUS_DEAD 0
-# define STATUS_THINKING 1
-# define STATUS_EATING 2
-# define STATUS_SLEEPING 3
 # define FORK_FREE 0
 # define FORK_TAKEN !FORK_FREE
 # define TAKE_FORK FORK_FREE
@@ -40,7 +36,7 @@ typedef struct s_fork
 typedef struct s_philo
 {
 	int				id;
-	int				status;
+	enum e_status	status;
 	unsigned int	last_ate;
 	int				times_eaten;
 	pthread_t		thread;
@@ -69,9 +65,12 @@ typedef struct s_sim
 	unsigned int	start;
 	t_list			*philos;
 	t_list			*forks;
+	pthread_t		monitor;
 }					t_sim;
 
-int					ph_sleep(t_philo *philo, unsigned int time_ms);
+// helper functions
+
+int					ph_sleep(unsigned int time_ms);
 size_t				ph_strlen(char *str);
 int					ph_parse_num(char *s);
 t_list				*ph_list_new(void *content);
@@ -80,16 +79,24 @@ t_list				*ph_list_get(t_list *list, size_t i);
 size_t				ph_list_size(t_list *list);
 void				ph_list_add(t_list **list, t_list *elem);
 void				ph_list_clear(t_list **list);
-void				*start_routine(void *settings);
-int					simulate(t_philo *philo);
-int					change_right_fork(t_philo *philo, int new_status);
-int					change_left_fork(t_philo *philo, int new_status);
-int					decide_on_next_status(t_philo *philo);
 int					get_time_in_ms(unsigned int *time_ms);
 
+// printer functions
+
 int					print_err(char *msg);
-int					set_n_print_status(t_philo *philo, int status);
+int					set_n_print_status(t_philo *philo, enum e_status status);
 void				print_philo(t_philo *philo);
 int					ph_print_fork_take(t_philo *philo);
+
+// monitor functions
+
+void				*start_monitor(void *sim_in_the_void);
+
+
+// philosopher functions
+
+void				*start_routine(void *philo_in_the_void);
+int					get_them_forks(t_philo *philo);
+int					drop_them_forks(t_philo *philo);
 
 #endif

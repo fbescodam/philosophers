@@ -6,10 +6,11 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:16:59 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/15 18:34:12 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 01:32:04 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <sys/time.h>
 #include "philo.h"
 
 /**
@@ -52,7 +53,9 @@ int	ph_parse_num(char *s)
 }
 
 /**
- * Timeofday wrapper
+ * C's gettimeofday wrapper
+ * @param[in] time_ms A pointer to the unsigned int to write the current timestamp to
+ * @return Returns 0 on error, 1 on success
  */
 int	get_time_in_ms(unsigned int *time_ms)
 {

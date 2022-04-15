@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/15 18:37:16 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 01:35:02 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,14 +42,13 @@ static int	start_sim(t_sim *sim)
 	t_philo		*philo;
 	t_list		*elem_fork;
 	t_list		*elem_philo;
+	void		*monit_ret;
 
-	write(1, "Initializing simulation...\n", 27);
 	sim->philos = NULL;
 	sim->forks = NULL;
 	i = 0;
 	while (i < sim->amount)
 	{
-		//write(1, "Generating fork...\n", 20);
 		fork = (t_fork *)malloc(sizeof(t_fork));
 		if (!fork)
 			return (-5);
@@ -57,15 +56,12 @@ static int	start_sim(t_sim *sim)
 		fork->status = FORK_FREE;
 		if (pthread_mutex_init(&fork->lock, NULL) != 0)
 			return (-7);
-		//write(1, "Creating new list elem for fork...\n", 36);
 		elem_fork = ph_list_new((void *)fork);
 		if (!elem_fork)
 			return (-6);
-		//write(1, "Adding fork to list of forks...\n", 33);
 		ph_list_add(&sim->forks, elem_fork);
 		i++;
 	}
-	write(1, "Forks have been generated\n", 27);
 	elem_fork = sim->forks;
 	i = 0;
 	while (i < sim->amount)
@@ -74,7 +70,7 @@ static int	start_sim(t_sim *sim)
 		if (!philo)
 			return (-1);
 		philo->id = i + 1;
-		philo->status = STATUS_THINKING;
+		philo->status = thinking;
 		philo->sim = sim;
 		philo->fork_left = (t_fork *)elem_fork->content;
 		elem_fork = elem_fork->next;
@@ -85,24 +81,24 @@ static int	start_sim(t_sim *sim)
 		if (!elem_philo)
 			return (-2);
 		ph_list_add(&sim->philos, elem_philo);
-		write(1, "Philosopher generated\n", 23);
 		i++;
 	}
+	if (pthread_create(&sim->monitor, NULL, &start_monitor, sim) != 0)
+		return (-3);
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
 	{
 		if (pthread_create(&((t_philo *)elem_philo->content)->thread, NULL, &start_routine, elem_philo->content) != 0)
 			return (-3);
-		//print_philo((t_philo *)elem_philo->content);
 		elem_philo = elem_philo->next;
 		i++;
 	}
-	// check for this value in all threads, only then start running simulation
-	sim->started = 1;
+	if (pthread_join(sim->monitor, &monit_ret) != 0)
+		return (-4);
 	if (!get_time_in_ms(&sim->start))
 		return (-8);
-	write(1, "Started running simulation...\n", 30);
+	sim->started = 1;
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
