@@ -6,25 +6,12 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/11 18:59:38 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/15 18:37:16 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
 #include <stdlib.h>
 #include "philo.h"
-
-/**
- * Print an error to stderr
- * @param msg	The message to print (excluding "Error: " and newline)
- */
-static int	print_err(char *msg)
-{
-	write(2, "Error: ", 7);
-	write(2, msg, ph_strlen(msg));
-	write(2, "\n", 1);
-	return (1);
-}
 
 /**
  * Check if the sim are set correctly
@@ -101,17 +88,21 @@ static int	start_sim(t_sim *sim)
 		write(1, "Philosopher generated\n", 23);
 		i++;
 	}
-	if (gettimeofday(&sim->start, NULL) != 0)
-		return (-8);
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
 	{
 		if (pthread_create(&((t_philo *)elem_philo->content)->thread, NULL, &start_routine, elem_philo->content) != 0)
 			return (-3);
+		//print_philo((t_philo *)elem_philo->content);
 		elem_philo = elem_philo->next;
 		i++;
 	}
+	// check for this value in all threads, only then start running simulation
+	sim->started = 1;
+	if (!get_time_in_ms(&sim->start))
+		return (-8);
+	write(1, "Started running simulation...\n", 30);
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
@@ -121,9 +112,6 @@ static int	start_sim(t_sim *sim)
 		elem_philo = elem_philo->next;
 		i++;
 	}
-	// check for this value in all threads, only then start running simulation
-	sim->running = 1;
-	write(1, "Started running simulation...\n", 30);
 	return (0);
 }
 
@@ -154,6 +142,8 @@ int	main(int argc, char **argv)
 		return (print_err("missing arguments"));
 	else if (argc > 6)
 		return (print_err("too many arguments"));
+	sim.started = 0;
+	sim.stopped = 0;
 	sim.amount = ph_parse_num(argv[1]);
 	sim.time_to_die = ph_parse_num(argv[2]);
 	sim.time_to_eat = ph_parse_num(argv[3]);

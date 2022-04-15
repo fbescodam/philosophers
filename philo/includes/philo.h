@@ -6,13 +6,14 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/02/04 17:24:28 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/15 18:50:09 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
+# include <unistd.h>
 # include <sys/time.h>
 # include <stddef.h>
 # include <pthread.h>
@@ -40,7 +41,8 @@ typedef struct s_philo
 {
 	int				id;
 	int				status;
-	t_timeval		last_ate;
+	unsigned int	last_ate;
+	int				times_eaten;
 	pthread_t		thread;
 	void			*ret;
 	t_fork			*fork_left;
@@ -56,18 +58,20 @@ typedef struct s_list
 
 typedef struct s_sim
 {
-	char			running;
+	char			started;
+	char			stopped;
 	int				amount;
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				times_to_eat;
 	pthread_mutex_t	write_lock;
-	t_timeval		start;
+	unsigned int	start;
 	t_list			*philos;
 	t_list			*forks;
 }					t_sim;
 
+int					ph_sleep(t_philo *philo, unsigned int time_ms);
 size_t				ph_strlen(char *str);
 int					ph_parse_num(char *s);
 t_list				*ph_list_new(void *content);
@@ -77,9 +81,15 @@ size_t				ph_list_size(t_list *list);
 void				ph_list_add(t_list **list, t_list *elem);
 void				ph_list_clear(t_list **list);
 void				*start_routine(void *settings);
-void				simulate(t_philo *philo);
+int					simulate(t_philo *philo);
 int					change_right_fork(t_philo *philo, int new_status);
 int					change_left_fork(t_philo *philo, int new_status);
-void				decide_on_next_status(t_philo *philo);
+int					decide_on_next_status(t_philo *philo);
+int					get_time_in_ms(unsigned int *time_ms);
+
+int					print_err(char *msg);
+int					set_n_print_status(t_philo *philo, int status);
+void				print_philo(t_philo *philo);
+int					ph_print_fork_take(t_philo *philo);
 
 #endif

@@ -6,28 +6,36 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/02/04 17:22:05 by fbes          #+#    #+#                 */
-/*   Updated: 2022/02/04 17:28:34 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/15 18:45:24 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
 #include "philo.h"
 
-void	simulate(t_philo *philo)
+/**
+ * Simulate a philosopher status (just call usleep and check if dead...)
+ * @return Returns the return value of ph_sleep or < 0 on error
+ */
+int	simulate(t_philo *philo)
 {
-	useconds_t	usecs;
+	unsigned int	sleep_time;
 
+	if (philo->sim->stopped)
+		return (2);
 	if (philo->status == STATUS_DEAD)
 	{
-		philo->sim->running = 0;
-		return ;
+		philo->sim->stopped = 1;
+		return (0);
 	}
 	else if (philo->status == STATUS_THINKING)
-		usecs = 10;
+		sleep_time = philo->sim->time_to_die;
 	else if (philo->status == STATUS_EATING)
-		usecs = philo->sim->time_to_eat;
+	{
+		if (get_time_in_ms(&philo->last_ate) != 0)
+			return (-8);
+		sleep_time = philo->sim->time_to_eat;
+	}
 	else if (philo->status == STATUS_SLEEPING)
-		usecs = philo->sim->time_to_sleep;
-	usleep(usecs);
-	// decide_on_next_status(philo);
+		sleep_time = philo->sim->time_to_sleep;
+	return (ph_sleep(philo, sleep_time));
 }

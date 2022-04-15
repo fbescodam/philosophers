@@ -6,14 +6,14 @@
 #    By: fbes <fbes@student.codam.nl>                 +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/11/19 18:04:03 by fbes          #+#    #+#                  #
-#    Updated: 2022/02/04 17:23:01 by fbes          ########   odam.nl          #
+#    Updated: 2022/04/14 18:35:40 by fbes          ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 NAME =		philo
 
 SRCS =		src/main.c src/useful.c src/philosopher.c src/list.c src/forks.c \
-			src/simulation.c
+			src/simulation.c src/printer.c src/sleep.c
 
 HEADERS =	includes/philo.h
 
@@ -22,7 +22,7 @@ INCLUDES =	-I includes
 OBJS =		$(SRCS:.c=.o)
 
 #CFLAGS =	-Wall -Werror -Wextra
-CFLAGS =
+CFLAGS =	-fsanitize=address
 
 all: $(NAME)
 

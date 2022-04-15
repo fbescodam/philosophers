@@ -6,84 +6,70 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/02/04 17:26:17 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/15 19:05:58 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
-#include <unistd.h>
 #include "philo.h"
 
 /**
- * Print a philosopher for debugging
- * @param philo	The struct to print
+ * Try and fetch forks
+ * @return Returns 1 if both were fetched, 0 if not
  */
-static void	print_philo(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->sim->write_lock);
-	printf("PHILOSOPHER %d\n", philo->id);
-	printf("status: %d\n", philo->status);
-	printf("last_ate: %lds, %dms\n", philo->last_ate.tv_sec, philo->last_ate.tv_usec);
-	printf("thread: %p\n", philo->thread);
-	printf("returned: %p\n", philo->ret);
-	printf("fork left: %p\n", philo->fork_left);
-	printf("fork right: %p\n", philo->fork_right);
-	printf("sim: %p\n", philo->sim);
-	printf("\n");
-	pthread_mutex_unlock(&philo->sim->write_lock);
-}
-
-static void	set_status(t_philo *philo, int status)
-{
-	philo->status = status;
-	pthread_mutex_lock(&philo->sim->write_lock);
-	if (status == STATUS_THINKING)
-		printf("FUTURE_TIMESTAMP %d is thinking\n", philo->id);
-	else if (status == STATUS_EATING)
-		printf("FUTURE_TIMESTAMP %d is eating\n", philo->id);
-	else if (status == STATUS_SLEEPING)
-		printf("FUTURE_TIMESTAMP %d is sleeping", philo->id);
-	else if (status == STATUS_DEAD)
-		printf("FUTURE_TIMESTAMP %d died", philo->id);
-	pthread_mutex_unlock(&philo->sim->write_lock);
-	simulate(philo);
-}
-
-static void	try_fetch_forks(t_philo *philo)
+static int	try_fetch_forks(t_philo *philo)
 {
 	if (philo->id % 2 == 1)
 	{
 		if (change_right_fork(philo, TAKE_FORK) == 0)
 		{
 			if (change_left_fork(philo, TAKE_FORK) == 0)
-			{
-				set_status(philo, STATUS_EATING);
-				return ;
-			}
+				return (1);
 			change_right_fork(philo, DROP_FORK);
 		}
 	}
-	else
+	else if (change_left_fork(philo, TAKE_FORK) == 0)
 	{
-		if (change_left_fork(philo, TAKE_FORK) == 0)
-		{
-			if (change_right_fork(philo, TAKE_FORK) == 0)
-			{
-				set_status(philo, STATUS_EATING);
-				return ;
-			}
-			change_left_fork(philo, DROP_FORK);
-		}
+		if (change_right_fork(philo, TAKE_FORK) == 0)
+			return (1);
+		change_left_fork(philo, DROP_FORK);
 	}
-	set_status(philo, STATUS_THINKING);
+	return (0);
 }
 
-void	decide_on_next_status(t_philo *philo)
+int	decide_on_next_status(t_philo *philo)
 {
+	unsigned int	time;
+
+	if (!get_time_in_ms(&time))
+		return (-1);
+	if (time - philo->last_ate > philo->sim->time_to_die)
+	{
+		if (!set_n_print_status(philo, STATUS_DEAD))
+			return (-1);
+		return (2);
+	}
 	if (philo->status == STATUS_EATING)
-		set_status(philo, STATUS_SLEEPING);
-	else
-		try_fetch_forks(philo);
+	{
+		change_left_fork(philo, DROP_FORK);
+		change_right_fork(philo, DROP_FORK);
+		if (!set_n_print_status(philo, STATUS_SLEEPING))
+			return (-1);
+		return (simulate(philo));
+	}
+	else if (try_fetch_forks(philo))
+	{
+		if (!set_n_print_status(philo, STATUS_EATING))
+			return (-1);
+		return (simulate(philo));
+	}
+	else if (philo->status != STATUS_THINKING)
+	{
+		if (!set_n_print_status(philo, STATUS_THINKING))
+			return (-1);
+		return (simulate(philo));
+	}
+	return (0);
 }
 
 /**
@@ -93,8 +79,11 @@ void	decide_on_next_status(t_philo *philo)
  */
 void	*start_routine(void *philo)
 {
+	while (!((t_philo *)philo)->sim->started)
+	{
+		ph_sleep(philo, 5);
+	}
 	((t_philo *)philo)->last_ate = ((t_philo *)philo)->sim->start;
-	print_philo((t_philo *)philo);
 	decide_on_next_status(philo);
 	return (NULL);
 }

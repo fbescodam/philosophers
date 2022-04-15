@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:16:59 by fbes          #+#    #+#                 */
-/*   Updated: 2021/11/19 18:35:49 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/15 18:34:12 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,17 @@ int	ph_parse_num(char *s)
 		i++;
 	}
 	return (num);
+}
+
+/**
+ * Timeofday wrapper
+ */
+int	get_time_in_ms(unsigned int *time_ms)
+{
+	t_timeval	curtime;
+
+	if (gettimeofday(&curtime, NULL) != 0)
+		return (0);
+	*time_ms = curtime.tv_sec * 1000 + curtime.tv_usec / 1000;
+	return (1);
 }
