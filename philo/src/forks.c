@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/02/04 17:20:25 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:33:00 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 01:41:49 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ int	drop_them_forks(t_philo *philo)
 {
 	if (philo->id % 2 == 1)
 	{
-		usleep(100000);
 		if (pthread_mutex_unlock(&philo->fork_right->lock) != 0)
 			return (0);
 		if (pthread_mutex_unlock(&philo->fork_left->lock) != 0)
