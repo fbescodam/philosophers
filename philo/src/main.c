@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 03:53:51 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 04:41:19 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,8 +85,6 @@ static int	start_sim(t_sim *sim)
 		ph_list_add(&sim->philos, elem_philo);
 		i++;
 	}
-	if (!get_time_in_ms(&sim->start))
-		return (-8);
 	if (pthread_create(&sim->monitor, NULL, &start_monitor, sim) != 0)
 		return (-3);
 	elem_philo = sim->philos;
@@ -139,6 +137,7 @@ int	main(int argc, char **argv)
 	else if (argc > 6)
 		return (print_err("too many arguments"));
 	sim.stopped = 0;
+	sim.start = 0;
 	sim.amount = ph_parse_num(argv[1]);
 	sim.time_to_die = ph_parse_num(argv[2]);
 	sim.time_to_eat = ph_parse_num(argv[3]);

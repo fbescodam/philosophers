@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 04:01:20 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 04:45:04 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,13 +47,23 @@ void	*start_routine(void *philo_in_the_void)
 	t_philo		*philo;
 
 	philo = (t_philo *)philo_in_the_void;
-	if (pthread_mutex_lock(&philo->last_ate_lock) != 0)
+	if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
 		return (0);
 	((t_philo *)philo)->last_ate = ((t_philo *)philo)->sim->start;
-	if (pthread_mutex_unlock(&philo->last_ate_lock) != 0)
+	if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
 		return (0);
-	while (!philo->sim->stopped)
+	while (1)
 	{
+		if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
+			return (0);
+		if (philo->sim->stopped)
+		{
+			if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
+				return (0);
+			break ;
+		}
+		if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
+			return (0);
 		if (simulate(philo) < 0)
 			print_err("an error occurred while simulating a philosopher");
 	}

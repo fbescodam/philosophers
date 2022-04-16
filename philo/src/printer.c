@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 03:59:57 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 04:43:31 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,11 @@ int	set_n_print_status(t_philo *philo, enum e_status status)
 
 	if (!get_time_in_ms(&timestamp))
 		return (0);
-	philo->status = status;
 	if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
 		return (0);
+	philo->status = status;
+	if (philo->sim->start == 0)
+		philo->sim->start = timestamp;
 	timestamp = timestamp - philo->sim->start;
 	if (!philo->sim->stopped)
 	{
