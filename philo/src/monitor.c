@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/15 22:09:11 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 04:54:20 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 05:33:44 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,11 @@ void	*start_monitor(void *sim_in_the_void)
 		while (philo_li)
 		{
 			philo = (t_philo *)philo_li->content;
-			if (pthread_mutex_lock(&philo->last_ate_lock) != 0)
+			if (pthread_mutex_lock(&sim->write_lock) != 0)
 				return (0);
-			if (timestamp > philo->last_ate && timestamp - philo->last_ate > (unsigned int)sim->time_to_die + 3)
+			if (timestamp > philo->last_ate && timestamp - philo->last_ate >= (unsigned int)sim->time_to_die)
 			{
-				if (pthread_mutex_unlock(&philo->last_ate_lock) != 0)
+				if (pthread_mutex_unlock(&sim->write_lock) != 0)
 					return (0);
 				if (!set_n_print_status(philo, dead))
 					return ((void *)1);
@@ -48,7 +48,7 @@ void	*start_monitor(void *sim_in_the_void)
 					return (0);
 				return ((void *)0);
 			}
-			if (pthread_mutex_unlock(&philo->last_ate_lock) != 0)
+			if (pthread_mutex_unlock(&sim->write_lock) != 0)
 				return (0);
 			philo_li = philo_li->next;
 		}

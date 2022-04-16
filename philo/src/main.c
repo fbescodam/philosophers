@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 04:41:19 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 04:58:19 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ static void	destroyer(t_sim *sim)
 			print_err("could not destroy a mutex");
 		elem_fork = elem_fork->next;
 	}
-	//system("leaks philo");
+	// system("leaks philo");
 }
 
 // TODO: return(print_err) should probably run destroyer() first
