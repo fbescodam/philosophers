@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:33:09 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 03:59:57 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void	print_philo(t_philo *philo)
  */
 int	set_n_print_status(t_philo *philo, enum e_status status)
 {
-	int				ret;
 	unsigned int	timestamp;
 
 	if (!get_time_in_ms(&timestamp))
@@ -82,7 +81,11 @@ int	set_n_print_status(t_philo *philo, enum e_status status)
 			printf("%6d %d is thinking\n", timestamp, philo->id);
 		else if (status == eating)
 		{
+			if (pthread_mutex_lock(&philo->last_ate_lock) != 0)
+				return (0);
 			if (!get_time_in_ms(&philo->last_ate))
+				return (0);
+			if (pthread_mutex_unlock(&philo->last_ate_lock) != 0)
 				return (0);
 			printf("%6d %d is eating\n", timestamp, philo->id);
 		}

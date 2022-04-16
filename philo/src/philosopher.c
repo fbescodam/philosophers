@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:39:45 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 04:01:20 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,13 @@ static int	simulate(t_philo *philo)
 void	*start_routine(void *philo_in_the_void)
 {
 	t_philo		*philo;
-	int			ret;
 
 	philo = (t_philo *)philo_in_the_void;
-	while (!((t_philo *)philo)->sim->started)
-		continue ;
+	if (pthread_mutex_lock(&philo->last_ate_lock) != 0)
+		return (0);
 	((t_philo *)philo)->last_ate = ((t_philo *)philo)->sim->start;
+	if (pthread_mutex_unlock(&philo->last_ate_lock) != 0)
+		return (0);
 	while (!philo->sim->stopped)
 	{
 		if (simulate(philo) < 0)

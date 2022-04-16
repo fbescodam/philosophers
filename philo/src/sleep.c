@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/08 22:01:28 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 03:46:48 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 03:56:01 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "philo.h"
 
 /**
- * Sleep, rewritten for this project, in steps of ~50 microseconds to make
+ * Sleep, rewritten for this project, in steps of ~500 microseconds to make
  * it more accurate
  * @param[in] time_ms The time to sleep, in milliseconds
  * @return Returns 1 on success, 0 on error

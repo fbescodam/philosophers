@@ -6,7 +6,7 @@
 #    By: fbes <fbes@student.codam.nl>                 +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/11/19 18:04:03 by fbes          #+#    #+#                  #
-#    Updated: 2022/04/15 22:09:17 by fbes          ########   odam.nl          #
+#    Updated: 2022/04/16 03:51:10 by fbes          ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ INCLUDES =	-I includes
 OBJS =		$(SRCS:.c=.o)
 
 #CFLAGS =	-Wall -Werror -Wextra
-CFLAGS =	-fsanitize=address
+CFLAGS =	-g -fsanitize=thread
 
 all: $(NAME)
 

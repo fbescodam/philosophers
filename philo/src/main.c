@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:35:02 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 03:53:51 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ static int	start_sim(t_sim *sim)
 		philo->id = i + 1;
 		philo->status = thinking;
 		philo->sim = sim;
+		if (pthread_mutex_init(&philo->last_ate_lock, NULL) != 0)
+			return (-7);
 		philo->fork_left = (t_fork *)elem_fork->content;
 		elem_fork = elem_fork->next;
 		if (!elem_fork)
@@ -83,6 +85,8 @@ static int	start_sim(t_sim *sim)
 		ph_list_add(&sim->philos, elem_philo);
 		i++;
 	}
+	if (!get_time_in_ms(&sim->start))
+		return (-8);
 	if (pthread_create(&sim->monitor, NULL, &start_monitor, sim) != 0)
 		return (-3);
 	elem_philo = sim->philos;
@@ -96,9 +100,6 @@ static int	start_sim(t_sim *sim)
 	}
 	if (pthread_join(sim->monitor, &monit_ret) != 0)
 		return (-4);
-	if (!get_time_in_ms(&sim->start))
-		return (-8);
-	sim->started = 1;
 	elem_philo = sim->philos;
 	i = 0;
 	while (i < sim->amount)
@@ -130,7 +131,6 @@ static void	destroyer(t_sim *sim)
 // TODO: return(print_err) should probably run destroyer() first
 int	main(int argc, char **argv)
 {
-	int			i;
 	t_sim		sim;
 	int			err;
 
@@ -138,7 +138,6 @@ int	main(int argc, char **argv)
 		return (print_err("missing arguments"));
 	else if (argc > 6)
 		return (print_err("too many arguments"));
-	sim.started = 0;
 	sim.stopped = 0;
 	sim.amount = ph_parse_num(argv[1]);
 	sim.time_to_die = ph_parse_num(argv[2]);

@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:31:14 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 03:32:03 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ typedef struct s_philo
 	int				id;
 	enum e_status	status;
 	unsigned int	last_ate;
+	pthread_mutex_t	last_ate_lock;
 	int				times_eaten;
 	pthread_t		thread;
 	void			*ret;
@@ -54,7 +55,6 @@ typedef struct s_list
 
 typedef struct s_sim
 {
-	char			started;
 	char			stopped;
 	int				amount;
 	int				time_to_die;
