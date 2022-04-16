@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/08 22:01:28 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:32:14 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/16 03:46:48 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,20 +22,18 @@
  */
 int	ph_sleep(unsigned int time_ms)
 {
-	useconds_t	wanted_time;
-	useconds_t	total_time;
-	useconds_t	time;
+	unsigned int	init_timestamp;
+	unsigned int	timestamp;
 
-	wanted_time = time_ms * 1000;
-	total_time = 0;
-	while (total_time < wanted_time)
+	if (!get_time_in_ms(&init_timestamp))
+		return (0);
+	if (!get_time_in_ms(&timestamp))
+		return (0);
+	while (timestamp < init_timestamp + time_ms)
 	{
-		time = wanted_time - total_time;
-		if (time > 50)
-			time = 50;
-		if (usleep(time) != 0)
+		usleep(500);
+		if (!get_time_in_ms(&timestamp))
 			return (0);
-		total_time += time;
 	}
 	return (1);
 }
