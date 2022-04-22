@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 03:32:03 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 18:07:18 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ typedef struct timeval	t_timeval;
 typedef struct s_fork
 {
 	int				id;
-	int				status;
 	pthread_mutex_t	lock;
 }					t_fork;
 

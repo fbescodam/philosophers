@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 04:58:19 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 18:07:55 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ static int	start_sim(t_sim *sim)
 		if (!fork)
 			return (-5);
 		fork->id = i + 1;
-		fork->status = FORK_FREE;
 		if (pthread_mutex_init(&fork->lock, NULL) != 0)
 			return (-7);
 		elem_fork = ph_list_new((void *)fork);
