@@ -6,11 +6,10 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:18:36 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:38:35 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
 #include <unistd.h>
 #include "philo.h"
 
@@ -57,9 +56,8 @@ void	*start_routine(void *philo_in_the_void)
 	{
 		if (philo->sim->stopped)
 			break ;
-		ret = simulate(philo);
-		if (ret < 0)
-			printf("an error occurred while simulating a philosopher: %d\n", ret);
+		if (simulate(philo) < 0)
+			print_err(philo->sim, "an error occurred in philo simulation");
 	}
 	return (NULL);
 }

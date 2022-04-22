@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:16:59 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:14:28 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:46:39 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	ph_parse_num(char *s)
 
 /**
  * C's gettimeofday wrapper
- * @param[in] time_ms A pointer to the unsigned int to write the current timestamp to
+ * @param[in] time_ms A pointer to an unsigned int to write the timestamp to
  * @return Returns 1
  */
 int	get_time_in_ms(unsigned int *time_ms)
