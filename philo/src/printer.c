@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 05:19:52 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 19:42:57 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int	print_err(char *msg)
 	return (1);
 }
 
-int	ph_print_fork_take(t_philo *philo)
+int	ph_print_fork_take(t_philo *philo, t_fork *fork)
 {
 	unsigned int	timestamp;
 
@@ -36,8 +36,8 @@ int	ph_print_fork_take(t_philo *philo)
 	pthread_mutex_lock(&philo->sim->write_lock);
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
-	if (!philo->sim->stopped)
-		printf("%6d %d has taken a fork\n", timestamp - philo->sim->start, philo->id);
+	//if (!philo->sim->stopped)
+		printf("%6d %d has taken fork %d\n", timestamp - philo->sim->start, philo->id, fork->id);
 	pthread_mutex_unlock(&philo->sim->write_lock);
 	return (1);
 }

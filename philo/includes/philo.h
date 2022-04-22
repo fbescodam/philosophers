@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 18:07:18 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 19:33:47 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ int					get_time_in_ms(unsigned int *time_ms);
 int					print_err(char *msg);
 int					set_n_print_status(t_philo *philo, enum e_status status);
 void				print_philo(t_philo *philo);
-int					ph_print_fork_take(t_philo *philo);
+int					ph_print_fork_take(t_philo *philo, t_fork *fork);
 
 // monitor functions
 

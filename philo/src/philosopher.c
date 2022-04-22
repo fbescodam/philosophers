@@ -6,11 +6,12 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 04:45:04 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 19:48:42 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "philo.h"
 
 /**
@@ -45,27 +46,26 @@ static int	simulate(t_philo *philo)
 void	*start_routine(void *philo_in_the_void)
 {
 	t_philo		*philo;
+	int			ret;
 
 	philo = (t_philo *)philo_in_the_void;
+	if (philo->sim->amount % 2 == 1)
+		usleep(philo->id % 3 * 1000);
+	else
+		usleep(philo->id % 2 * 1000);
 	if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
 		return (0);
-	((t_philo *)philo)->last_ate = ((t_philo *)philo)->sim->start;
+	if (!get_time_in_ms(&philo->last_ate))
+		return (0);
 	if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
 		return (0);
 	while (1)
 	{
-		if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
-			return (0);
 		if (philo->sim->stopped)
-		{
-			if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
-				return (0);
 			break ;
-		}
-		if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
-			return (0);
-		if (simulate(philo) < 0)
-			print_err("an error occurred while simulating a philosopher");
+		ret = simulate(philo);
+		if (ret < 0)
+			printf("an error occurred while simulating a philosopher: %d\n", ret);
 	}
 	return (NULL);
 }
