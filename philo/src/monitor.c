@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/15 22:09:11 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:09:01 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:18:17 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,7 @@ void	*start_monitor(void *sim_in_the_void)
 			times_eaten_sum += philo->times_eaten;
 			if (timestamp > philo->last_ate && timestamp - philo->last_ate > (unsigned int)sim->time_to_die)
 			{
-				if (!set_n_print_status(philo, dead))
-					return ((void *)1);
+				set_n_print_status(philo, dead);
 				philo->status = dead;
 				sim->stopped = 1;
 				return ((void *)0);
