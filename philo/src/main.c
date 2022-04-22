@@ -6,11 +6,12 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 18:07:55 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:07:44 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
+#include <limits.h>
 #include "philo.h"
 
 /**
@@ -71,6 +72,8 @@ static int	start_sim(t_sim *sim)
 		philo->id = i + 1;
 		philo->status = thinking;
 		philo->sim = sim;
+		philo->last_ate = UINT_MAX;
+		philo->times_eaten = 0;
 		if (pthread_mutex_init(&philo->last_ate_lock, NULL) != 0)
 			return (-7);
 		philo->fork_left = (t_fork *)elem_fork->content;
@@ -114,12 +117,12 @@ static void	destroyer(t_sim *sim)
 	t_list		*elem_fork;
 
 	if (pthread_mutex_destroy(&sim->write_lock) != 0)
-		print_err("could not destroy a mutex");
+		print_err(NULL, "could not destroy a mutex");
 	elem_fork = sim->forks;
 	while (elem_fork)
 	{
 		if (pthread_mutex_destroy(&((t_fork *)elem_fork->content)->lock) != 0)
-			print_err("could not destroy a mutex");
+			print_err(NULL, "could not destroy a mutex");
 		elem_fork = elem_fork->next;
 	}
 	// system("leaks philo");
@@ -132,9 +135,9 @@ int	main(int argc, char **argv)
 	int			err;
 
 	if (argc < 5)
-		return (print_err("missing arguments"));
+		return (print_err(NULL, "missing arguments"));
 	else if (argc > 6)
-		return (print_err("too many arguments"));
+		return (print_err(NULL, "too many arguments"));
 	sim.stopped = 0;
 	sim.start = 0;
 	sim.amount = ph_parse_num(argv[1]);
@@ -147,32 +150,32 @@ int	main(int argc, char **argv)
 		sim.times_to_eat = UNLIMITED_TIMES_TO_EAT;
 	err = sim_set_correctly(&sim);
 	if (err == -1)
-		return (print_err("invalid number of philosophers set"));
+		return (print_err(NULL, "invalid number of philosophers set"));
 	else if (err == -2)
-		return (print_err("invalid time to die set"));
+		return (print_err(NULL, "invalid time to die set"));
 	else if (err == -3)
-		return (print_err("invalid time to eat set"));
+		return (print_err(NULL, "invalid time to eat set"));
 	else if (err == -4)
-		return (print_err("invalid time to sleep set"));
+		return (print_err(NULL, "invalid time to sleep set"));
 	else if (err == -5)
-		return (print_err("invalid times to eat per philosopher set"));
+		return (print_err(NULL, "invalid times to eat per philosopher set"));
 	if (pthread_mutex_init(&sim.write_lock, NULL) != 0)
-		return (print_err("mutex initialization failure in write_lock"));
+		return (print_err(NULL, "mutex initialization failure in write_lock"));
 	err = start_sim(&sim);
 	if (err < 0)
 	{
 		if (err == -1 || err == -2 || err == -5 || err == -6)
-			print_err("memory allocation failure");
+			print_err(NULL, "memory allocation failure");
 		else if (err == -3)
-			print_err("thread creation failure");
+			print_err(NULL, "thread creation failure");
 		else if (err == -4)
-			print_err("thread join failure");
+			print_err(NULL, "thread join failure");
 		else if (err == -7)
-			print_err("mutex initializion failure in fork");
+			print_err(NULL, "mutex initializion failure in fork");
 		else if (err == -8)
-			print_err("unable to fetch the current time");
+			print_err(NULL, "unable to fetch the current time");
 		else
-			print_err("an unknown error occurred during simulation");
+			print_err(NULL, "an unknown error occurred during simulation");
 		destroyer(&sim);
 	}
 	destroyer(&sim);

@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 19:42:57 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:12:48 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,25 +19,28 @@
  * @param msg	The message to print (excluding "Error: " and newline)
  * @return Returns 1 as integer for exit status code
  */
-int	print_err(char *msg)
+int	print_err(t_sim *sim, char *msg)
 {
+	if (sim)
+		pthread_mutex_lock(&sim->write_lock);
 	write(2, "Error: ", 7);
 	write(2, msg, ph_strlen(msg));
 	write(2, "\n", 1);
+	if (sim)
+		pthread_mutex_unlock(&sim->write_lock);
 	return (1);
 }
 
-int	ph_print_fork_take(t_philo *philo, t_fork *fork)
+int	ph_print_fork_take(t_philo *philo)
 {
 	unsigned int	timestamp;
 
-	if (!get_time_in_ms(&timestamp))
-		return (0);
+	get_time_in_ms(&timestamp);
 	pthread_mutex_lock(&philo->sim->write_lock);
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
-	//if (!philo->sim->stopped)
-		printf("%6d %d has taken fork %d\n", timestamp - philo->sim->start, philo->id, fork->id);
+	if (!philo->sim->stopped)
+		printf("%6d %d has taken a fork\n", timestamp - philo->sim->start, philo->id);
 	pthread_mutex_unlock(&philo->sim->write_lock);
 	return (1);
 }
@@ -71,10 +74,8 @@ int	set_n_print_status(t_philo *philo, enum e_status status)
 {
 	unsigned int	timestamp;
 
-	if (!get_time_in_ms(&timestamp))
-		return (0);
-	if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
-		return (0);
+	get_time_in_ms(&timestamp);
+	pthread_mutex_lock(&philo->sim->write_lock);
 	philo->status = status;
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
@@ -85,20 +86,21 @@ int	set_n_print_status(t_philo *philo, enum e_status status)
 			printf("%6d %d is thinking\n", timestamp, philo->id);
 		else if (status == eating)
 		{
-			if (pthread_mutex_lock(&philo->last_ate_lock) != 0)
-				return (0);
-			if (!get_time_in_ms(&philo->last_ate))
-				return (0);
-			if (pthread_mutex_unlock(&philo->last_ate_lock) != 0)
-				return (0);
+			pthread_mutex_lock(&philo->last_ate_lock);
+			get_time_in_ms(&philo->last_ate);
+			pthread_mutex_unlock(&philo->last_ate_lock);
 			printf("%6d %d is eating\n", timestamp, philo->id);
 		}
 		else if (status == sleeping)
+		{
+			if (philo->sim->times_to_eat == UNLIMITED_TIMES_TO_EAT
+				|| philo->times_eaten < philo->sim->times_to_eat)
+				philo->times_eaten++;
 			printf("%6d %d is sleeping\n", timestamp, philo->id);
+		}
 		else if (status == dead)
 			printf("%6d %d died\n", timestamp, philo->id);
 	}
-	if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
-		return (0);
+	pthread_mutex_unlock(&philo->sim->write_lock);
 	return (1);
 }

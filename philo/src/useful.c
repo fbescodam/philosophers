@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:16:59 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/16 01:32:04 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:14:28 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,14 +55,13 @@ int	ph_parse_num(char *s)
 /**
  * C's gettimeofday wrapper
  * @param[in] time_ms A pointer to the unsigned int to write the current timestamp to
- * @return Returns 0 on error, 1 on success
+ * @return Returns 1
  */
 int	get_time_in_ms(unsigned int *time_ms)
 {
 	t_timeval	curtime;
 
-	if (gettimeofday(&curtime, NULL) != 0)
-		return (0);
+	gettimeofday(&curtime, NULL);
 	*time_ms = curtime.tv_sec * 1000 + curtime.tv_usec / 1000;
 	return (1);
 }

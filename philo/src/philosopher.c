@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 19:48:42 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:12:34 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,12 +53,9 @@ void	*start_routine(void *philo_in_the_void)
 		usleep(philo->id % 3 * 1000);
 	else
 		usleep(philo->id % 2 * 1000);
-	if (pthread_mutex_lock(&philo->sim->write_lock) != 0)
-		return (0);
-	if (!get_time_in_ms(&philo->last_ate))
-		return (0);
-	if (pthread_mutex_unlock(&philo->sim->write_lock) != 0)
-		return (0);
+	pthread_mutex_lock(&philo->sim->write_lock);
+	get_time_in_ms(&philo->last_ate);
+	pthread_mutex_unlock(&philo->sim->write_lock);
 	while (1)
 	{
 		if (philo->sim->stopped)

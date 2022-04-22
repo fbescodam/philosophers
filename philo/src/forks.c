@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/02/04 17:20:25 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 19:52:50 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/22 21:06:55 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,11 @@
 int	get_them_forks(t_philo *philo)
 {
 	// printf("philo %d wants to take fork %d\n", philo->id, philo->fork_left->id);
-	if (pthread_mutex_lock(&philo->fork_left->lock) != 0)
-		return (0);
-	ph_print_fork_take(philo, philo->fork_left);
+	pthread_mutex_lock(&philo->fork_left->lock);
+	ph_print_fork_take(philo);
 	// printf("philo %d wants to take fork %d\n", philo->id, philo->fork_right->id);
-	if (pthread_mutex_lock(&philo->fork_right->lock) != 0)
-		return (0);
-	ph_print_fork_take(philo, philo->fork_right);
+	pthread_mutex_lock(&philo->fork_right->lock);
+	ph_print_fork_take(philo);
 	return (1);
 }
 
@@ -40,10 +38,8 @@ int	get_them_forks(t_philo *philo)
 int	drop_them_forks(t_philo *philo)
 {
 	// printf("philo %d dropped fork %d\n", philo->id, philo->fork_right->id);
-	if (pthread_mutex_unlock(&philo->fork_right->lock) != 0)
-		return (0);
+	pthread_mutex_unlock(&philo->fork_right->lock);
 	// printf("philo %d dropped fork %d\n", philo->id, philo->fork_left->id);
-	if (pthread_mutex_unlock(&philo->fork_left->lock) != 0)
-		return (0);
+	pthread_mutex_unlock(&philo->fork_left->lock);
 	return (1);
 }
