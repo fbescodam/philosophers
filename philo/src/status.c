@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/22 21:22:12 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:32:47 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:05:22 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,7 @@ static void	stat_func_sleep(t_philo *philo, unsigned int *timestamp)
 
 static void	stat_func_die(t_philo *philo, unsigned int *timestamp)
 {
-	pthread_mutex_lock(&philo->sim->status_lock);
 	philo->sim->stopped = 1;
-	pthread_mutex_unlock(&philo->sim->status_lock);
 	pthread_mutex_lock(&philo->sim->write_lock);
 	printf("%6d %d died\n", *timestamp, philo->id);
 	pthread_mutex_unlock(&philo->sim->write_lock);
@@ -75,10 +73,6 @@ void	simulate_status(t_philo *philo, enum e_status status)
 	timestamp = timestamp - philo->sim->start;
 	pthread_mutex_lock(&philo->sim->status_lock);
 	if (!philo->sim->stopped)
-	{
-		pthread_mutex_unlock(&philo->sim->status_lock);
 		(*(stat_funcs[status]))(philo, &timestamp);
-	}
-	else
-		pthread_mutex_unlock(&philo->sim->status_lock);
+	pthread_mutex_unlock(&philo->sim->status_lock);
 }
