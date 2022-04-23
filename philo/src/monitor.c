@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/15 22:09:11 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:14:28 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:37:28 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,13 @@
 
 /**
  * Loop over all philosophers and check if they are "healthy" (have to die)
- * @param[in] sim The simulation struct
- * @return Returns 1 if simulation stopped, 0 otherwise
+ * @param[in] sim		The simulation struct
+ * @param[in] time		The current timestamp
+ * @param[in] eat_sum	A pointer to the parameter where the sum of all
+ * 						times_eatens are stored
+ * @return				Returns 1 if simulation stopped, 0 otherwise
  */
-static int	philo_doctor(t_sim *sim, unsigned int *time, unsigned int *eat_sum)
+static int	philo_doctor(t_sim *sim, unsigned int *time, int *eat_sum)
 {
 	t_list			*philo_li;
 	t_philo			*philo;
@@ -34,7 +37,7 @@ static int	philo_doctor(t_sim *sim, unsigned int *time, unsigned int *eat_sum)
 			&& *time - philo->last_ate > (unsigned int)sim->time_to_die)
 		{
 			pthread_mutex_unlock(&philo->last_ate_lock);
-			set_n_print_status(philo, dead);
+			simulate_status(philo, dead);
 			return (1);
 		}
 		pthread_mutex_unlock(&philo->last_ate_lock);
@@ -46,9 +49,8 @@ static int	philo_doctor(t_sim *sim, unsigned int *time, unsigned int *eat_sum)
 void	*start_monitor(void *sim_in_the_void)
 {
 	unsigned int	timestamp;
-	unsigned int	times_eaten_sum;
+	int				times_eaten_sum;
 	t_sim			*sim;
-
 
 	sim = (t_sim *)sim_in_the_void;
 	while (1)

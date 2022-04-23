@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/22 21:22:12 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:29:22 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:32:47 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ static void	stat_func_die(t_philo *philo, unsigned int *timestamp)
  * @param[in] philo The philosopher struct
  * @param[in] status The new status of the philosopher
  */
-void	set_n_print_status(t_philo *philo, enum e_status status)
+void	simulate_status(t_philo *philo, enum e_status status)
 {
 	unsigned int	timestamp;
 	static void		(*stat_funcs[4])(t_philo *philo, unsigned int *timestamp);

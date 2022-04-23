@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:17:08 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:32:47 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,15 @@ static int	simulate(t_philo *philo)
 {
 	if (!get_them_forks(philo))
 		return (-3);
-	set_n_print_status(philo, eating);
+	simulate_status(philo, eating);
 	if (!ph_sleep(philo->sim->time_to_eat))
 		return (-2);
 	if (!drop_them_forks(philo))
 		return (-4);
-	set_n_print_status(philo, sleeping);
+	simulate_status(philo, sleeping);
 	if (!ph_sleep(philo->sim->time_to_sleep))
 		return (-2);
-	set_n_print_status(philo, thinking);
+	simulate_status(philo, thinking);
 	return (0);
 }
 
