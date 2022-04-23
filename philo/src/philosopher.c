@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:32:47 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:45:38 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,25 @@
 /**
  * Simulate one day of a philosopher's life
  * @param[in] philo The philosopher to simulate
- * @return Returns 0 on success, < 0 on error
  */
-static int	simulate(t_philo *philo)
+static void	simulate(t_philo *philo)
 {
-	if (!get_them_forks(philo))
-		return (-3);
+	get_them_forks(philo);
 	simulate_status(philo, eating);
-	if (!ph_sleep(philo->sim->time_to_eat))
-		return (-2);
-	if (!drop_them_forks(philo))
-		return (-4);
+	ph_sleep(philo->sim->time_to_eat);
+	drop_them_forks(philo);
 	simulate_status(philo, sleeping);
-	if (!ph_sleep(philo->sim->time_to_sleep))
-		return (-2);
+	ph_sleep(philo->sim->time_to_sleep);
 	simulate_status(philo, thinking);
-	return (0);
+}
+
+static void	*simulate_one(t_philo *philo)
+{
+	get_them_forks(philo);
+	ph_sleep(philo->sim->time_to_die);
+	drop_them_forks(philo);
+	simulate_status(philo, dead);
+	return ((void *)0);
 }
 
 /**
@@ -45,6 +48,8 @@ void	*start_routine(void *philo_in_the_void)
 	int			stopped;
 
 	philo = (t_philo *)philo_in_the_void;
+	if (philo->sim->amount == 1)
+		return (simulate_one(philo));
 	if (philo->sim->amount % 2 == 1)
 		usleep(philo->id % 3 * 1000);
 	else
@@ -59,8 +64,7 @@ void	*start_routine(void *philo_in_the_void)
 		pthread_mutex_unlock(&philo->sim->status_lock);
 		if (stopped)
 			break ;
-		if (simulate(philo) < 0)
-			print_err(philo->sim, "an error occurred in philo simulation");
+		simulate(philo);
 	}
-	return (NULL);
+	return ((void *)0);
 }

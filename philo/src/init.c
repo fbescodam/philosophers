@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/23 16:42:08 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 17:21:57 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:45:02 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,9 @@ int	start_threads(t_sim *sim)
 {
 	t_list		*elem_philo;
 
-	if (pthread_create(&sim->monitor, NULL, &start_monitor, sim) != 0)
-		return (-3);
+	if (sim->amount > 1)
+		if (pthread_create(&sim->monitor, NULL, &start_monitor, sim) != 0)
+			return (-3);
 	elem_philo = sim->philos;
 	while (elem_philo)
 	{
@@ -99,7 +100,8 @@ int	start_threads(t_sim *sim)
 			return (-3);
 		elem_philo = elem_philo->next;
 	}
-	pthread_join(sim->monitor, &sim->monit_ret);
+	if (sim->amount > 1)
+		pthread_join(sim->monitor, &sim->monit_ret);
 	elem_philo = sim->philos;
 	while (elem_philo)
 	{

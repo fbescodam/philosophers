@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/22 21:22:12 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 17:05:22 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:40:27 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,10 @@ void	simulate_status(t_philo *philo, enum e_status status)
 
 	if (!stat_funcs[thinking])
 	{
+		stat_funcs[dead] = stat_func_die;
 		stat_funcs[thinking] = stat_func_think;
 		stat_funcs[eating] = stat_func_eat;
 		stat_funcs[sleeping] = stat_func_sleep;
-		stat_funcs[dead] = stat_func_die;
 	}
 	get_time_in_ms(&timestamp);
 	if (philo->sim->start == 0)
