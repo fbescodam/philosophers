@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/15 22:09:11 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:42:50 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:14:28 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,16 @@ static int	philo_doctor(t_sim *sim, unsigned int *time, unsigned int *eat_sum)
 	while (philo_li)
 	{
 		philo = (t_philo *)philo_li->content;
+		pthread_mutex_lock(&philo->last_ate_lock);
 		*eat_sum += philo->times_eaten;
 		if (*time > philo->last_ate
 			&& *time - philo->last_ate > (unsigned int)sim->time_to_die)
 		{
+			pthread_mutex_unlock(&philo->last_ate_lock);
 			set_n_print_status(philo, dead);
-			philo->status = dead;
-			sim->stopped = 1;
 			return (1);
 		}
+		pthread_mutex_unlock(&philo->last_ate_lock);
 		philo_li = philo_li->next;
 	}
 	return (0);
@@ -59,7 +60,9 @@ void	*start_monitor(void *sim_in_the_void)
 		if (sim->times_to_eat != UNLIMITED_TIMES_TO_EAT
 			&& times_eaten_sum / sim->amount == sim->times_to_eat)
 		{
+			pthread_mutex_lock(&sim->status_lock);
 			sim->stopped = 1;
+			pthread_mutex_unlock(&sim->status_lock);
 			return ((void *) 0);
 		}
 	}

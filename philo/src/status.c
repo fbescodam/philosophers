@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/22 21:22:12 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:31:39 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:29:22 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,28 +15,41 @@
 
 static void	stat_func_think(t_philo *philo, unsigned int *timestamp)
 {
+	pthread_mutex_lock(&philo->sim->write_lock);
 	printf("%6d %d is thinking\n", *timestamp, philo->id);
+	pthread_mutex_unlock(&philo->sim->write_lock);
 }
 
 static void	stat_func_eat(t_philo *philo, unsigned int *timestamp)
 {
+	pthread_mutex_lock(&philo->sim->write_lock);
+	printf("%6d %d is eating\n", *timestamp, philo->id);
+	pthread_mutex_unlock(&philo->sim->write_lock);
 	pthread_mutex_lock(&philo->last_ate_lock);
 	get_time_in_ms(&philo->last_ate);
 	pthread_mutex_unlock(&philo->last_ate_lock);
-	printf("%6d %d is eating\n", *timestamp, philo->id);
 }
 
 static void	stat_func_sleep(t_philo *philo, unsigned int *timestamp)
 {
+	pthread_mutex_lock(&philo->sim->write_lock);
+	printf("%6d %d is sleeping\n", *timestamp, philo->id);
+	pthread_mutex_unlock(&philo->sim->write_lock);
+	pthread_mutex_lock(&philo->last_ate_lock);
 	if (philo->sim->times_to_eat == UNLIMITED_TIMES_TO_EAT
 		|| philo->times_eaten < philo->sim->times_to_eat)
 		philo->times_eaten++;
-	printf("%6d %d is sleeping\n", *timestamp, philo->id);
+	pthread_mutex_unlock(&philo->last_ate_lock);
 }
 
 static void	stat_func_die(t_philo *philo, unsigned int *timestamp)
 {
+	pthread_mutex_lock(&philo->sim->status_lock);
+	philo->sim->stopped = 1;
+	pthread_mutex_unlock(&philo->sim->status_lock);
+	pthread_mutex_lock(&philo->sim->write_lock);
 	printf("%6d %d died\n", *timestamp, philo->id);
+	pthread_mutex_unlock(&philo->sim->write_lock);
 }
 
 /**
@@ -57,12 +70,15 @@ void	set_n_print_status(t_philo *philo, enum e_status status)
 		stat_funcs[dead] = stat_func_die;
 	}
 	get_time_in_ms(&timestamp);
-	pthread_mutex_lock(&philo->sim->write_lock);
-	philo->status = status;
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
 	timestamp = timestamp - philo->sim->start;
+	pthread_mutex_lock(&philo->sim->status_lock);
 	if (!philo->sim->stopped)
+	{
+		pthread_mutex_unlock(&philo->sim->status_lock);
 		(*(stat_funcs[status]))(philo, &timestamp);
-	pthread_mutex_unlock(&philo->sim->write_lock);
+	}
+	else
+		pthread_mutex_unlock(&philo->sim->status_lock);
 }

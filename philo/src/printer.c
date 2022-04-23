@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:45:41 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:23:11 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,17 @@ int	ph_print_fork_take(t_philo *philo)
 
 	get_time_in_ms(&timestamp);
 	elapsed_time = timestamp - philo->sim->start;
-	pthread_mutex_lock(&philo->sim->write_lock);
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
+	pthread_mutex_lock(&philo->sim->status_lock);
 	if (!philo->sim->stopped)
+	{
+		pthread_mutex_unlock(&philo->sim->status_lock);
+		pthread_mutex_lock(&philo->sim->write_lock);
 		printf("%6d %d has taken a fork\n", elapsed_time, philo->id);
-	pthread_mutex_unlock(&philo->sim->write_lock);
+		pthread_mutex_unlock(&philo->sim->write_lock);
+	}
+	else
+		pthread_mutex_unlock(&philo->sim->status_lock);
 	return (1);
 }

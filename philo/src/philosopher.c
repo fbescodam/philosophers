@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 19:19:19 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:38:35 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:17:08 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,19 +42,22 @@ static int	simulate(t_philo *philo)
 void	*start_routine(void *philo_in_the_void)
 {
 	t_philo		*philo;
-	int			ret;
+	int			stopped;
 
 	philo = (t_philo *)philo_in_the_void;
 	if (philo->sim->amount % 2 == 1)
 		usleep(philo->id % 3 * 1000);
 	else
 		usleep(philo->id % 2 * 1000);
-	pthread_mutex_lock(&philo->sim->write_lock);
+	pthread_mutex_lock(&philo->last_ate_lock);
 	get_time_in_ms(&philo->last_ate);
-	pthread_mutex_unlock(&philo->sim->write_lock);
+	pthread_mutex_unlock(&philo->last_ate_lock);
 	while (1)
 	{
-		if (philo->sim->stopped)
+		pthread_mutex_lock(&philo->sim->status_lock);
+		stopped = philo->sim->stopped;
+		pthread_mutex_unlock(&philo->sim->status_lock);
+		if (stopped)
 			break ;
 		if (simulate(philo) < 0)
 			print_err(philo->sim, "an error occurred in philo simulation");

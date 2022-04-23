@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:21:48 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:29:35 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ typedef struct s_fork
 typedef struct s_philo
 {
 	int				id;
-	enum e_status	status;
 	unsigned int	last_ate;
 	pthread_mutex_t	last_ate_lock;
 	int				times_eaten;
@@ -61,6 +60,7 @@ typedef struct s_sim
 	int				time_to_sleep;
 	int				times_to_eat;
 	pthread_mutex_t	write_lock;
+	pthread_mutex_t	status_lock;
 	unsigned int	start;
 	t_list			*philos;
 	t_list			*forks;

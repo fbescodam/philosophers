@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/22 21:07:44 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 16:29:25 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ static int	start_sim(t_sim *sim)
 		if (!philo)
 			return (-1);
 		philo->id = i + 1;
-		philo->status = thinking;
 		philo->sim = sim;
 		philo->last_ate = UINT_MAX;
 		philo->times_eaten = 0;
@@ -118,6 +117,8 @@ static void	destroyer(t_sim *sim)
 
 	if (pthread_mutex_destroy(&sim->write_lock) != 0)
 		print_err(NULL, "could not destroy a mutex");
+	if (pthread_mutex_destroy(&sim->status_lock) != 0)
+		print_err(NULL, "could not destroy a mutex");
 	elem_fork = sim->forks;
 	while (elem_fork)
 	{
@@ -125,6 +126,7 @@ static void	destroyer(t_sim *sim)
 			print_err(NULL, "could not destroy a mutex");
 		elem_fork = elem_fork->next;
 	}
+	// TODO: destroy philo mutexes!
 	// system("leaks philo");
 }
 
@@ -161,6 +163,8 @@ int	main(int argc, char **argv)
 		return (print_err(NULL, "invalid times to eat per philosopher set"));
 	if (pthread_mutex_init(&sim.write_lock, NULL) != 0)
 		return (print_err(NULL, "mutex initialization failure in write_lock"));
+	if (pthread_mutex_init(&sim.status_lock, NULL) != 0)
+		return (print_err(NULL, "mutex initialization failure in status_lock"));
 	err = start_sim(&sim);
 	if (err < 0)
 	{
