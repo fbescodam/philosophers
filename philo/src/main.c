@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 17:29:30 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:48:54 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,16 @@
  */
 static int	sim_set_correctly(t_sim *sim)
 {
-	if (sim->amount < 0)
+	if (sim->amount < 1)
 		return (-1);
-	if (sim->time_to_die < 0)
+	if (sim->time_to_die < 1)
 		return (-2);
-	if (sim->time_to_eat < 0)
+	if (sim->time_to_eat < 1)
 		return (-3);
-	if (sim->time_to_sleep < 0)
+	if (sim->time_to_sleep < 1)
 		return (-4);
 	if (sim->times_to_eat != UNLIMITED_TIMES_TO_EAT
-		&& sim->times_to_eat < 0)
+		&& sim->times_to_eat < 1)
 		return (-5);
 	return (1);
 }
