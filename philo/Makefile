@@ -6,14 +6,15 @@
 #    By: fbes <fbes@student.codam.nl>                 +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/11/19 18:04:03 by fbes          #+#    #+#                  #
-#    Updated: 2022/04/23 16:33:07 by fbes          ########   odam.nl          #
+#    Updated: 2022/04/23 17:32:40 by fbes          ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 NAME =		philo
 
-SRCS =		src/main.c src/useful.c src/philosopher.c src/list.c src/forks.c \
-			src/printer.c src/sleep.c src/monitor.c src/status.c
+SRCS =		src/main.c src/errors.c src/init.c src/useful.c src/list.c \
+			src/philosopher.c src/forks.c src/printer.c src/sleep.c \
+			src/monitor.c src/status.c
 
 HEADERS =	includes/philo.h
 
@@ -22,7 +23,6 @@ INCLUDES =	-I includes
 OBJS =		$(SRCS:.c=.o)
 
 CFLAGS =	-Wall -Werror -Wextra
-#CFLAGS =	-g -fsanitize=thread
 
 all: $(NAME)
 

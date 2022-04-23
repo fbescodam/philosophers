@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:38:39 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:26:21 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,12 @@ typedef struct s_sim
 	t_list			*philos;
 	t_list			*forks;
 	pthread_t		monitor;
+	void			*monit_ret;
 }					t_sim;
 
 // helper functions
 
+void				destroyer(t_sim *sim);
 int					ph_sleep(unsigned int time_ms);
 size_t				ph_strlen(char *str);
 int					ph_parse_num(char *s);
@@ -82,8 +84,15 @@ int					get_time_in_ms(unsigned int *time_ms);
 // printer functions
 
 int					print_err(t_sim *sim, char *msg);
-void				simulate_status(t_philo *philo, enum e_status status);
+int					err_handler_sim_set_correctly(int err);
+int					err_handler_start_sim(int err, t_sim *sim);
 int					ph_print_fork_take(t_philo *philo);
+
+// initialization functions
+
+int					init_forks(t_sim *sim);
+int					init_philos(t_sim *sim);
+int					start_threads(t_sim *sim);
 
 // monitor functions
 
@@ -92,6 +101,7 @@ void				*start_monitor(void *sim_in_the_void);
 // philosopher functions
 
 void				*start_routine(void *philo_in_the_void);
+void				simulate_status(t_philo *philo, enum e_status status);
 int					get_them_forks(t_philo *philo);
 int					drop_them_forks(t_philo *philo);
 

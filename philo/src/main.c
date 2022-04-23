@@ -6,12 +6,11 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:07:54 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 16:29:25 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/23 17:29:30 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <limits.h>
+#include <unistd.h>
 #include "philo.h"
 
 /**
@@ -35,102 +34,62 @@ static int	sim_set_correctly(t_sim *sim)
 	return (1);
 }
 
-// TODO free memory before return
 static int	start_sim(t_sim *sim)
 {
-	int			i;
-	t_fork		*fork;
-	t_philo		*philo;
-	t_list		*elem_fork;
-	t_list		*elem_philo;
-	void		*monit_ret;
+	int			ret;
 
 	sim->philos = NULL;
 	sim->forks = NULL;
-	i = 0;
-	while (i < sim->amount)
-	{
-		fork = (t_fork *)malloc(sizeof(t_fork));
-		if (!fork)
-			return (-5);
-		fork->id = i + 1;
-		if (pthread_mutex_init(&fork->lock, NULL) != 0)
-			return (-7);
-		elem_fork = ph_list_new((void *)fork);
-		if (!elem_fork)
-			return (-6);
-		ph_list_add(&sim->forks, elem_fork);
-		i++;
-	}
-	elem_fork = sim->forks;
-	i = 0;
-	while (i < sim->amount)
-	{
-		philo = (t_philo *)malloc(sizeof(t_philo));
-		if (!philo)
-			return (-1);
-		philo->id = i + 1;
-		philo->sim = sim;
-		philo->last_ate = UINT_MAX;
-		philo->times_eaten = 0;
-		if (pthread_mutex_init(&philo->last_ate_lock, NULL) != 0)
-			return (-7);
-		philo->fork_left = (t_fork *)elem_fork->content;
-		elem_fork = elem_fork->next;
-		if (!elem_fork)
-			elem_fork = sim->forks;
-		philo->fork_right = (t_fork *)elem_fork->content;
-		elem_philo = ph_list_new((void *)philo);
-		if (!elem_philo)
-			return (-2);
-		ph_list_add(&sim->philos, elem_philo);
-		i++;
-	}
-	if (pthread_create(&sim->monitor, NULL, &start_monitor, sim) != 0)
-		return (-3);
-	elem_philo = sim->philos;
-	i = 0;
-	while (i < sim->amount)
-	{
-		if (pthread_create(&((t_philo *)elem_philo->content)->thread, NULL, &start_routine, elem_philo->content) != 0)
-			return (-3);
-		elem_philo = elem_philo->next;
-		i++;
-	}
-	if (pthread_join(sim->monitor, &monit_ret) != 0)
-		return (-4);
-	elem_philo = sim->philos;
-	i = 0;
-	while (i < sim->amount)
-	{
-		if (pthread_join(((t_philo *)elem_philo->content)->thread, &((t_philo *)elem_philo->content)->ret) != 0)
-			return (-4);
-		elem_philo = elem_philo->next;
-		i++;
-	}
+	ret = init_forks(sim);
+	if (ret < 0)
+		return (ret);
+	ret = init_philos(sim);
+	if (ret < 0)
+		return (ret);
+	ret = start_threads(sim);
+	if (ret < 0)
+		return (ret);
 	return (0);
 }
 
-static void	destroyer(t_sim *sim)
+void	destroyer(t_sim *sim)
 {
-	t_list		*elem_fork;
+	t_list		*elem;
 
-	if (pthread_mutex_destroy(&sim->write_lock) != 0)
-		print_err(NULL, "could not destroy a mutex");
-	if (pthread_mutex_destroy(&sim->status_lock) != 0)
-		print_err(NULL, "could not destroy a mutex");
-	elem_fork = sim->forks;
-	while (elem_fork)
+	if (pthread_mutex_destroy(&sim->write_lock))
+		print_err(NULL, "could not destroy write_lock mutex");
+	if (pthread_mutex_destroy(&sim->status_lock))
+		print_err(NULL, "could not destroy status_lock mutex");
+	elem = sim->forks;
+	while (elem)
 	{
-		if (pthread_mutex_destroy(&((t_fork *)elem_fork->content)->lock) != 0)
-			print_err(NULL, "could not destroy a mutex");
-		elem_fork = elem_fork->next;
+		if (pthread_mutex_destroy(&((t_fork *)elem->content)->lock))
+			print_err(NULL, "could not destroy a fork mutex");
+		elem = elem->next;
 	}
-	// TODO: destroy philo mutexes!
-	// system("leaks philo");
+	elem = sim->philos;
+	while (elem)
+	{
+		if (pthread_mutex_destroy(&((t_philo *)elem->content)->last_ate_lock))
+			print_err(NULL, "could not destroy a last_ate_lock mutex");
+		elem = elem->next;
+	}
 }
 
-// TODO: return(print_err) should probably run destroyer() first
+static void	setup_sim(t_sim *sim, int argc, char **argv)
+{
+	sim->stopped = 0;
+	sim->start = 0;
+	sim->amount = ph_parse_num(argv[1]);
+	sim->time_to_die = ph_parse_num(argv[2]);
+	sim->time_to_eat = ph_parse_num(argv[3]);
+	sim->time_to_sleep = ph_parse_num(argv[4]);
+	if (argc == 6)
+		sim->times_to_eat = ph_parse_num(argv[5]);
+	else
+		sim->times_to_eat = UNLIMITED_TIMES_TO_EAT;
+}
+
 int	main(int argc, char **argv)
 {
 	t_sim		sim;
@@ -140,47 +99,21 @@ int	main(int argc, char **argv)
 		return (print_err(NULL, "missing arguments"));
 	else if (argc > 6)
 		return (print_err(NULL, "too many arguments"));
-	sim.stopped = 0;
-	sim.start = 0;
-	sim.amount = ph_parse_num(argv[1]);
-	sim.time_to_die = ph_parse_num(argv[2]);
-	sim.time_to_eat = ph_parse_num(argv[3]);
-	sim.time_to_sleep = ph_parse_num(argv[4]);
-	if (argc == 6)
-		sim.times_to_eat = ph_parse_num(argv[5]);
-	else
-		sim.times_to_eat = UNLIMITED_TIMES_TO_EAT;
+	setup_sim(&sim, argc, argv);
 	err = sim_set_correctly(&sim);
-	if (err == -1)
-		return (print_err(NULL, "invalid number of philosophers set"));
-	else if (err == -2)
-		return (print_err(NULL, "invalid time to die set"));
-	else if (err == -3)
-		return (print_err(NULL, "invalid time to eat set"));
-	else if (err == -4)
-		return (print_err(NULL, "invalid time to sleep set"));
-	else if (err == -5)
-		return (print_err(NULL, "invalid times to eat per philosopher set"));
+	if (err < 0)
+		return (err_handler_sim_set_correctly(err));
 	if (pthread_mutex_init(&sim.write_lock, NULL) != 0)
 		return (print_err(NULL, "mutex initialization failure in write_lock"));
 	if (pthread_mutex_init(&sim.status_lock, NULL) != 0)
+	{
+		if (pthread_mutex_destroy(&sim.write_lock))
+			print_err(NULL, "could not destroy write_lock mutex");
 		return (print_err(NULL, "mutex initialization failure in status_lock"));
+	}
 	err = start_sim(&sim);
 	if (err < 0)
-	{
-		if (err == -1 || err == -2 || err == -5 || err == -6)
-			print_err(NULL, "memory allocation failure");
-		else if (err == -3)
-			print_err(NULL, "thread creation failure");
-		else if (err == -4)
-			print_err(NULL, "thread join failure");
-		else if (err == -7)
-			print_err(NULL, "mutex initializion failure in fork");
-		else if (err == -8)
-			print_err(NULL, "unable to fetch the current time");
-		else
-			print_err(NULL, "an unknown error occurred during simulation");
-		destroyer(&sim);
-	}
+		return (err_handler_start_sim(err, &sim));
 	destroyer(&sim);
+	return (0);
 }
