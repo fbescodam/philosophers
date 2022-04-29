@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/19 18:08:00 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 17:26:21 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/29 21:14:28 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,6 @@
 enum e_status{dead, thinking, eating, sleeping};
 
 # define UNLIMITED_TIMES_TO_EAT -2
-# define FORK_FREE 0
-# define FORK_TAKEN !FORK_FREE
-# define TAKE_FORK FORK_FREE
-# define DROP_FORK FORK_TAKEN
 
 typedef struct timeval	t_timeval;
 
