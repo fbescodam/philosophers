@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/14 17:21:44 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 17:13:31 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/29 21:12:34 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ int	ph_print_fork_take(t_philo *philo)
 	unsigned int	elapsed_time;
 
 	get_time_in_ms(&timestamp);
-	elapsed_time = timestamp - philo->sim->start;
+	pthread_mutex_lock(&philo->sim->status_lock);
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
-	pthread_mutex_lock(&philo->sim->status_lock);
+	elapsed_time = timestamp - philo->sim->start;
 	if (!philo->sim->stopped)
 	{
 		pthread_mutex_lock(&philo->sim->write_lock);

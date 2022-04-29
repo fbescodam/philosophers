@@ -6,7 +6,7 @@
 /*   By: fbes <fbes@student.codam.nl>                 +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/04/22 21:22:12 by fbes          #+#    #+#                 */
-/*   Updated: 2022/04/23 17:40:27 by fbes          ########   odam.nl         */
+/*   Updated: 2022/04/29 21:12:49 by fbes          ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,10 @@ void	simulate_status(t_philo *philo, enum e_status status)
 		stat_funcs[sleeping] = stat_func_sleep;
 	}
 	get_time_in_ms(&timestamp);
+	pthread_mutex_lock(&philo->sim->status_lock);
 	if (philo->sim->start == 0)
 		philo->sim->start = timestamp;
 	timestamp = timestamp - philo->sim->start;
-	pthread_mutex_lock(&philo->sim->status_lock);
 	if (!philo->sim->stopped)
 		(*(stat_funcs[status]))(philo, &timestamp);
 	pthread_mutex_unlock(&philo->sim->status_lock);
